@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕒 Gestión de Horarios</title>
+  <link rel="icon" type="image/png" href="img/icono_tienda.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* =================================
+       VARIABLES / RESET (Estilo Unificado)
+       ================================ */
+    :root {
+      --primary: #5bc0de;
+      --accent: #46b8da;
+      --muted: #909ba7;
+      --success: #63d471;
+      --warning: #f8c050;
+      --danger: #ff6b6b;
+      --bg: #1e1e2d;
+      /* Fondo oscuro */
+      --card: #2b2b3f;
+      /* Color de tarjeta oscura */
+      --line: #4a4a68;
+      --text: #f1f1f1;
+      /* Texto claro */
+      --input: #3c3c50;
+      --shadow: rgba(0, 0, 0, 0.4);
+      --shadow-light: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 1rem;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    /* =================================
+       CONTENEDOR PRINCIPAL
+       ================================ */
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 1rem 0;
+      padding: 24px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-top: 0;
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    /* =================================
+       ESTADO Y CONTROLES
+       ================================ */
+    #estado {
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--input);
+      color: var(--text);
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 1px 3px var(--shadow);
+    }
+
+    .controles {
+      display: flex;
+      gap: 10px;
+    }
+
+    .controles button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px var(--shadow);
+    }
+
+    #guardarBtn {
+      background: var(--success);
+      color: var(--bg);
+    }
+
+    #guardarBtn:hover {
+      background: #50c85d;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(99, 212, 113, 0.4);
+    }
+
+    #recargarBtn {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    #recargarBtn:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(91, 192, 222, 0.4);
+    }
+
+    /* =================================
+       TABLA DE HORARIOS
+       ================================ */
+    .horario-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .horario-row {
+      display: grid;
+      grid-template-columns: 1fr repeat(2, 0.8fr) 0.5fr;
+      align-items: center;
+      padding: 12px 15px;
+      background: var(--input);
+      border-radius: 8px;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 5px var(--shadow);
+    }
+
+    .horario-row:hover {
+      background: #4a4a68;
+    }
+
+    .horario-row.inactive {
+      opacity: 0.5;
+      background: #3c3c50;
+    }
+
+    .day-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .horario-input {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 8px;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .horario-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(91, 192, 222, 0.3);
+    }
+
+    .status-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Interruptor tipo iOS */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--danger);
+      transition: .4s;
+      border-radius: 28px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--text);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: var(--success);
+    }
+
+    input:focus+.slider {
+      box-shadow: 0 0 1px var(--primary);
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(22px);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .horario-row {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 8px;
+      }
+
+      .day-name {
+        grid-area: 1 / 1 / 2 / 2;
+        text-align: left;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed var(--line);
+      }
+
+      .input-group:nth-of-type(1) {
+        grid-area: 2 / 1 / 3 / 2;
+      }
+
+      .input-group:nth-of-type(2) {
+        grid-area: 3 / 1 / 4 / 2;
+      }
+
+      .status-toggle {
+        grid-area: 4 / 1 / 5 / 2;
+        justify-content: flex-start;
+        padding-top: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>🕒 Configuración de Horarios</h1>
+
+    <div id="estado">Cargando configuración...</div>
+
+    <div id="horario-form" class="horario-list">
+      <!-- Las filas de horario se insertarán aquí por JavaScript -->
+    </div>
+
+    <div class="controles">
+      <button id="guardarBtn" title="Guardar los cambios de horario en el servidor">Guardar Horario</button>
+      <button id="recargarBtn" title="Recargar el horario actual desde el servidor">Recargar</button>
+    </div>
+  </div>
+
+
+  <script>
+    /* =================================
+       CONFIGURACIÓN Y VARIABLES
+       ================================ */
+    // !! Reemplaza con la URL de tu Google Apps Script
+    const API_HORARIO_URL = 'https://script.google.com/macros/s/AKfycbxOCBCR_1CsQJz9YljFyiL3YxgnvlUy_eEQMSmmIf9jvsCt0a0aO0RjoUD0yfBbq1_liXXQ/exec';
+
+    const DAYS_OF_WEEK = [
+      'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+    ];
+
+    const q = (selector) => document.querySelector(selector);
+    const qA = (selector) => document.querySelectorAll(selector);
+
+    /* =================================
+       UTILIDADES DE UI
+       ================================ */
+
+    /**
+     * Muestra un mensaje de estado con color.
+     * @param {string} message Mensaje a mostrar.
+     * @param {'info'|'success'|'danger'|'warning'} type Tipo de estado.
+     */
+    function showStatus(message, type = 'info') {
+      const estadoEl = q('#estado');
+      estadoEl.textContent = message;
+      estadoEl.style.color = 'var(--text)';
+      estadoEl.style.backgroundColor = 'var(--input)';
+
+      switch (type) {
+        case 'success':
+          estadoEl.style.backgroundColor = 'var(--success)';
+          estadoEl.style.color = 'var(--bg)';
+          break;
+        case 'danger':
+          estadoEl.style.backgroundColor = 'var(--danger)';
+          estadoEl.style.color = 'var(--text)';
+          break;
+        case 'warning':
+          estadoEl.style.backgroundColor = 'var(--warning)';
+          estadoEl.style.color = 'var(--bg)';
+          break;
+        case 'info':
+        default:
+          estadoEl.style.backgroundColor = 'var(--input)';
+          estadoEl.style.color = 'var(--text)';
+          break;
+      }
+    }
+
+
+    /* =================================
+       LÓGICA DEL FORMULARIO Y API
+       ================================ */
+
+    /**
+     * Genera la estructura HTML para una fila de horario.
+     * @param {string} day Nombre del día.
+     * @param {string} open Hora de apertura.
+     * @param {string} close Hora de cierre.
+     * @param {boolean} active Si está activo.
+     * @returns {string} HTML de la fila.
+     */
+    function createHorarioRow(day, open = '09:00', close = '18:00', active = true) {
+      const dayId = day.toLowerCase().replace(/[áéíóúüñ]/g, (match) => {
+        const accents = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ü': 'u', 'ñ': 'n' };
+        return accents[match] || match;
+      });
+
+      return `
+        <div class="horario-row ${active ? '' : 'inactive'}" data-day="${dayId}">
+          <div class="day-name">${day}</div>
+
+          <div class="input-group">
+            <label for="${dayId}-open">Apertura</label>
+            <input type="time" id="${dayId}-open" class="horario-input" value="${open}" ${active ? '' : 'disabled'}>
+          </div>
+
+          <div class="input-group">
+            <label for="${dayId}-close">Cierre</label>
+            <input type="time" id="${dayId}-close" class="horario-input" value="${close}" ${active ? '' : 'disabled'}>
+          </div>
+
+          <div class="status-toggle">
+            <label class="switch" title="Activar/Desactivar ${day}">
+              <input type="checkbox" id="${dayId}-active" data-day-toggle="${dayId}" ${active ? 'checked' : ''}>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Inicializa la interfaz y genera las filas de horario.
+     * @param {Array<Object>} horarios Array de objetos de horario para inicializar.
+     */
+    function initializeUI(horarios = []) {
+      const formEl = q('#horario-form');
+      formEl.innerHTML = '';
+
+      const horarioMap = new Map(horarios.map(h => [h.day, h]));
+
+      DAYS_OF_WEEK.forEach(day => {
+        const data = horarioMap.get(day) || {
+          day: day,
+          open: (day === 'Sábado' || day === 'Domingo') ? '10:00' : '09:00',
+          close: (day === 'Sábado' || day === 'Domingo') ? '14:00' : '18:00',
+          active: (day !== 'Domingo')
+        };
+        formEl.insertAdjacentHTML('beforeend', createHorarioRow(data.day, data.open, data.close, data.active));
+      });
+
+      // Añadir listeners para los toggles de estado
+      qA('[data-day-toggle]').forEach(toggle => {
+        toggle.addEventListener('change', handleDayToggle);
+      });
+    }
+
+    /**
+     * Maneja el cambio en el toggle de estado de un día.
+     * @param {Event} e Evento de cambio.
+     */
+    function handleDayToggle(e) {
+      const dayId = e.target.dataset.dayToggle;
+      const row = q(`.horario-row[data-day="${dayId}"]`);
+      const inputs = qA(`.horario-row[data-day="${dayId}"] .horario-input`);
+
+      if (e.target.checked) {
+        row.classList.remove('inactive');
+        inputs.forEach(input => input.disabled = false);
+      } else {
+        row.classList.add('inactive');
+        inputs.forEach(input => input.disabled = true);
+      }
+    }
+
+
+    /**
+     * Carga el horario actual desde el Google Apps Script.
+     */
+    async function loadHorario() {
+      showStatus('⏳ Obteniendo horario actual...');
+      
+      const MAX_RETRIES = 3;
+      for (let i = 0; i < MAX_RETRIES; i++) {
+        try {
+            const url = `${API_HORARIO_URL}?action=getHorario`;
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+              throw new Error(`Error de red: ${response.statusText} (${response.status})`);
+            }
+
+            const result = await response.json();
+            
+            if (result.status === 'success' && Array.isArray(result.data)) {
+              initializeUI(result.data);
+              showStatus('✅ Horario cargado correctamente.', 'success');
+              return; // Salir de la función si tiene éxito
+            } else if (result.status === 'no_data') {
+              showStatus('⚠️ No se encontró horario guardado. Usando valores predeterminados.', 'warning');
+              initializeUI(); // Inicializar con valores predeterminados
+              return;
+            } else {
+              throw new Error(`Error de API: ${result.message || 'Respuesta inesperada.'}`);
+            }
+
+        } catch (error) {
+            console.error('❌ Error al cargar el horario:', error);
+            if (i < MAX_RETRIES - 1) {
+              // Aplicar retroceso exponencial
+              const delay = Math.pow(2, i) * 1000;
+              console.log(`Reintentando en ${delay / 1000}s...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+              showStatus(`❌ ERROR al cargar: ${error.message}. Usando valores predeterminados.`, 'danger');
+              initializeUI(); // Inicializar con valores predeterminados si falla después de los reintentos
+            }
+        }
+      }
+    }
+
+    /**
+     * Guarda el horario actual de la interfaz en el Google Apps Script.
+     */
+    async function saveHorario() {
+      showStatus('⏳ Guardando horario, por favor espera...');
+      q('#guardarBtn').disabled = true;
+
+      const horarioData = [];
+      qA('.horario-row').forEach(row => {
+        const dayId = row.dataset.day;
+        const dayName = row.querySelector('.day-name').textContent;
+        const openInput = row.querySelector(`#${dayId}-open`);
+        const closeInput = row.querySelector(`#${dayId}-close`);
+        const activeToggle = row.querySelector(`#${dayId}-active`);
+
+        const isActive = activeToggle.checked;
+        const openTime = isActive ? openInput.value : '';
+        const closeTime = isActive ? closeInput.value : '';
+
+        // Solo se guarda si hay valores o si está inactivo
+        if (isActive && (!openTime || !closeTime)) {
+          showStatus(`⚠️ Error: Debes ingresar hora de apertura y cierre para ${dayName}.`, 'warning');
+          q('#guardarBtn').disabled = false;
+          throw new Error('Faltan horas de apertura/cierre.');
+        }
+
+        horarioData.push({
+          day: dayName,
+          open: openTime,
+          close: closeTime,
+          active: isActive
+        });
+      });
+
+      const payload = {
+        action: 'saveHorario',
+        horario: horarioData
+      };
+
+      const MAX_RETRIES = 3;
+      for (let i = 0; i < MAX_RETRIES; i++) {
+        try {
+          const response = await fetch(API_HORARIO_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error de red: ${response.statusText} (${response.status})`);
+          }
+
+          const result = await response.json();
+
+          if (result.status === 'success') {
+            showStatus('✅ Horario guardado con éxito.', 'success');
+            setTimeout(() => showStatus('Horario actualizado.'), 3000);
+            return;
+          } else {
+            throw new Error(`Error de API: ${result.message || 'Respuesta de API inesperada.'}`);
+          }
+
+        } catch (error) {
+          console.error('❌ Error al guardar el horario:', error);
+          if (i < MAX_RETRIES - 1) {
+              const delay = Math.pow(2, i) * 1000;
+              console.log(`Reintentando en ${delay / 1000}s...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+              showStatus(`❌ ERROR al guardar: ${error.message}.`, 'danger');
+          }
+        } finally {
+            q('#guardarBtn').disabled = false;
+        }
+      }
+    }
+
+
+    /* =================================
+       INICIALIZACIÓN
+       ================================ */
+
+    window.onload = () => {
+      if (!API_HORARIO_URL || API_HORARIO_URL.includes('AKfycbxOCBCR_1CsQJz9YljFyiL3YxgnvlUy_eEQMSmmIf9jvsCt0aO0RjoUD0yfBbq1_liXXQ/exec'.slice(0, 10))) {
+        showStatus('⚠️ ADVERTENCIA: La URL de la API es de ejemplo. Cámbiala para producción.', 'warning');
+      }
+
+      q('#guardarBtn').addEventListener('click', saveHorario);
+      q('#recargarBtn').addEventListener('click', loadHorario);
+
+      // Cargar el horario al iniciar la página
+      loadHorario();
+    };
+  </script>
+</body>
+
+</html>

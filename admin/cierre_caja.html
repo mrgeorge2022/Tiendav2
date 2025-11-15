@@ -4,7 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Dashboard — Cierre de Caja</title>
+    <title>Caja</title>
+      <link rel="icon" type="image/png" href="../img/icono_tienda.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         /* ================================
@@ -1205,12 +1207,10 @@
         /* =================================
            MOBILE MENU TOGGLE
            ================================= */
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-            // transform icon toggling (simple)
-            const el = document.getElementById('mobile-menu-btn');
-            el.textContent = el.textContent === '☰' ? '✕' : '☰';
-        });
+document.getElementById('mobile-menu-btn')?.addEventListener('click', (e) => {
+  // const el = e.currentTarget; // 'el' ya no es necesario
+  document.getElementById('sidebar').classList.toggle('active');
+});
 
         /* =================================
            EVENTOS INICIALES

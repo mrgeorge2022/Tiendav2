@@ -500,13 +500,45 @@
 }
 
 
+/* Clase para el input de fecha y botón de recarga */
+.fecha-cierre-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+}
+.fecha-cierre-container label {
+    font-weight: 700;
+    white-space: nowrap;
+}
+.fecha-cierre-container input[type="date"] {
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 200px; /* Limitar el ancho */
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--input);
+    color: var(--text);
+}
+.fecha-cierre-container .btn-reload {
+    background: var(--success); /* Usamos el color de éxito para el botón de recarga */
+    color: var(--input);
+    padding: 8px 12px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
 
     </style>
 </head>
 
 <body>
     <div class="app" role="application" aria-label="Panel de Cierre de Caja">
-        <!-- SIDEBAR (se esconde en móvil) -->
         <aside id="sidebar" aria-label="Navegación principal">
             <h2>Gestión de Caja</h2>
             <nav aria-label="Secciones">
@@ -518,7 +550,6 @@
                 <a href="#" class="nav-link" data-section="producido-section" onclick="showSection(this)"
                     id="link-prod">📊 Producido (Ventas)</a>
             </nav>
-    <!-- ⭐ BOTÓN PEGADO ABAJO ⭐ -->
     <div id="sidebar-footer">
         <button class="admin-btn" onclick="window.location.href='admin.html'">
             ⚙️ Ir al Panel Admin
@@ -527,15 +558,12 @@
 
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="main" id="main-content">
-            <!-- Barra móvil -->
             <div id="mobile-topbar" aria-hidden="true">
                 <button class="menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">☰</button>
                 <div style="font-weight:800;color:var(--primary)">Gestión de Caja</div>
             </div>
 
-            <!-- PRODUCIDO (puede mostrarse/ocultarse) -->
             <section id="producido-section" class="card section-container" style="display:none">
                 <h1>📊 Producido por Método de Pago y Canal</h1>
                 <p style="color:var(--muted);margin-bottom:14px">Resumen de ventas a corte: <strong
@@ -590,7 +618,6 @@
                 </div>
             </section>
 
-            <!-- CIERRE -->
             <section id="cierre-section" class="card section-container" style="display:block">
                 <h1>💵 Cierre de Caja del Día</h1>
                 <p style="color:var(--muted);margin-bottom:8px">Conciliación para: <strong id="fechaActual">...</strong>
@@ -598,6 +625,11 @@
                 <div id="estadoCarga" style="color:var(--warning);margin-bottom:12px">⏳ Cargando datos
                     de ventas...</div>
 
+                <div class="fecha-cierre-container">
+                    <label for="fechaCierreReal">Fecha del cierre:</label>
+                    <input type="date" id="fechaCierreReal" required />
+                    <button class="btn btn-reload" onclick="cargarPedidos()">Recargar Datos</button>
+                </div>
                 <div class="total-summary" role="region" aria-label="Resumen de ventas esperadas">
                     <div class="label">Total Venta Esperado:</div>
                     <div class="amount" id="ventaTotalSistema">$ 0</div>
@@ -654,7 +686,6 @@
                     </div>
                 </div>
 
-                <!-- Resultado total: SOLO MENSAJE (CUADRADO/SOBRANTE/FALTANTE) -->
                 <div id="diferenciaTotal" role="status" aria-live="polite">
                     Ingrese los valores contados para calcular la diferencia total.
                 </div>
@@ -675,7 +706,6 @@
                 </div>
             </section>
 
-            <!-- HISTORIAL -->
             <section id="historial-section" class="card section-container" style="display:none">
                 <h1>📜 Historial de cierres</h1>
                 <p style="color:var(--muted)">Consulta registros anteriores</p>
@@ -700,13 +730,14 @@
         /* =================================
            CONFIG BÁSICA
            ================================= */
-        const API_URL_PEDIDOS = "https://script.google.com/macros/s/AKfycbwez78KX4oEXCGWV_olvy_J1C8YwURxN-1YaZiYYqQJPVLAJuaRI_5EVl4v14OMjonM/exec";
-        const API_URL_CIERRES = "https://script.google.com/macros/s/AKfycbzoEN5CldFTrWRoNVdpDN0fQP-bx77rlpUdwdWi1HAIjBrGv3I0iuYnWUndPAAwvDxujg/exec";
+// Las URLs se cargarán dinámicamente desde ../config.json
+let API_URL_PEDIDOS = null; 
+let API_URL_CIERRES = null; 
 
-        let sistemaData = null;
-        let cierreData = null;
-        let allPedidos = [];
-        const RANGO_TOLERANCIA = 500;
+let sistemaData = null;
+let cierreData = null;
+let allPedidos = [];
+const RANGO_TOLERANCIA = 500;
 
         // UTIL: formateo COP sin decimales
         function formatCurrency(amount) {
@@ -751,18 +782,38 @@
            CARGA DE DATOS (PEDIDOS -> PRODUCIDO + CIERRE)
            ================================= */
         async function cargarPedidos() {
+// Verificar si las APIs ya fueron cargadas (NUEVA LÓGICA DE VERIFICACIÓN)
+            if (!API_URL_PEDIDOS || !API_URL_CIERRES) {
+                 // Si aún no están cargadas, salimos y esperamos a que el DOMContentLoaded las cargue.
+                 const estadoCargaCierre = document.getElementById('estadoCarga');
+                 if (estadoCargaCierre.textContent !== '⏳ Cargando configuración...') {
+                     estadoCargaCierre.textContent = '❌ Configuración no cargada. Intente recargar la página.';
+                     estadoCargaCierre.style.color = 'var(--danger)';
+                 }
+                 return;
+            }
+
             const estadoCargaCierre = document.getElementById('estadoCarga');
             const estadoCargaProducido = document.getElementById('producido-loading');
             estadoCargaCierre.textContent = '⏳ Cargando...';
             estadoCargaProducido.textContent = '⏳ Cargando datos para el análisis...';
 
             try {
-                const today = new Date();
-                const todayStr = formatFechaActual(today);
+                // ⭐ INICIO CAMBIO: OBTENER FECHA SELECCIONADA
+                const fechaInput = document.getElementById('fechaCierreReal');
+                // Asegurar que se tome la fecha del input, si está vacía, se puede dejar que falle o usar hoy. 
+                // Mejor, al estar inicializado en DOMContentLoaded, siempre tendrá un valor.
+                const fechaSeleccionada = new Date(fechaInput.value + 'T00:00:00'); // Convertir a Date object
+                
+                // Formato DD/MM/YYYY para filtrar en la hoja de cálculo
+                const fechaFiltroStr = formatFechaActual(fechaSeleccionada); 
+                
+                // Mostrar fecha seleccionada en UI
+                document.getElementById('fechaActual').textContent = formatFechaCorte(fechaSeleccionada);
+                document.getElementById('fechaCorteProducido').textContent = formatFechaCorte(fechaSeleccionada);
 
-                document.getElementById('fechaActual').textContent = formatFechaCorte(today);
-                document.getElementById('fechaCorteProducido').textContent = formatFechaCorte(today);
-
+                // Los datos de Producido no tienen control de fecha, así que se mantienen para "hoy" (fecha del sistema).
+                const today = new Date(); 
                 const monthName = today.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
                 const yearNow = today.getFullYear();
                 document.getElementById('mesActual').textContent = monthName;
@@ -771,20 +822,21 @@
                 document.getElementById('yearActual').textContent = yearNow;
                 document.getElementById('yearActual2').textContent = yearNow;
                 document.getElementById('yearActual3').textContent = yearNow;
+                // ⭐ FIN CAMBIO
 
                 const resp = await fetch(API_URL_PEDIDOS);
                 if (!resp.ok) throw new Error('Error en la API de pedidos: ' + resp.status);
                 allPedidos = await resp.json();
 
-                // calcular cierre del día
-                const { cierreDataHoy, pedidosContados } = calcularDatosCierre(allPedidos, todayStr);
+                // ⭐ USO DE fechaFiltroStr para calcular cierre del día
+                const { cierreDataHoy, pedidosContados } = calcularDatosCierre(allPedidos, fechaFiltroStr);
                 sistemaData = cierreDataHoy;
                 renderEsperado(sistemaData);
 
-                estadoCargaCierre.textContent = `✅ ${pedidosContados} pedidos procesados para cierre.`;
+                estadoCargaCierre.textContent = `✅ ${pedidosContados} pedidos procesados para cierre del ${fechaFiltroStr}.`;
                 estadoCargaCierre.style.color = 'var(--success)';
 
-                // producido
+                // producido usa la fecha de "hoy" (del sistema) ya que es un reporte general.
                 const prodGeneral = calcularProducido(allPedidos, today, 'general');
                 renderProducido(prodGeneral, 'producido-body-general');
 
@@ -825,6 +877,7 @@
             let ventaTotalEfectivo = 0, ventaTotalTransferencia = 0, ventaTotalMixto = 0, ventaTotalOtros = 0, pedidosContados = 0;
             pedidos.forEach(p => {
                 const totalPagar = cleanAndParseTotal(p.totalPagar);
+                // Usa todayString (fecha seleccionada en DD/MM/YYYY) para filtrar
                 if (String(p.fecha).trim() === todayString) {
                     pedidosContados++;
                     const metodo = String(p.metodoPago || '').toLowerCase().trim();
@@ -1004,7 +1057,7 @@
 
             // preparar cierreData para envío
             cierreData = {
-                fecha: formatFechaActual(new Date()),
+                // ⭐ CAMBIO: Se elimina la asignación de fecha aquí para usar la fecha del input al registrar
                 efectivoContado: contadoEfectivo, efectivoEsperado: esperadoEfectivo, diferenciaEfectivo: diffEfectivo,
                 transferenciaContada: contadoTransferencia, transferenciaEsperada: esperadoTransferencia, diferenciaTransferencia: diffTransferencia,
                 mixtoContado: contadoMixto, mixtoEsperado: esperadoMixto, diferenciaMixto: diffMixto,
@@ -1091,7 +1144,55 @@
                 return;
             }
 
-            const payload = { ...cierreData, usuario: responsable, notas };
+            // ⭐ INICIO CAMBIO: Capturar ambas fechas y la hora
+
+            // 1. Obtener la fecha y hora ACTUAL del sistema (Fecha Cierre)
+            const hoy = new Date();
+            const fechaCierreActual = formatFechaActual(hoy); 
+            // Formato HH:MM:SS para Hora Cierre
+            const horaCierreActual = hoy.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+            // 2. Obtener la fecha seleccionada por el usuario (Fecha Cierre Tardio)
+            const fechaCierreInput = document.getElementById('fechaCierreReal').value;
+            const fechaCierreTardioDate = new Date(fechaCierreInput + 'T00:00:00');
+            const fechaCierreTardio = formatFechaActual(fechaCierreTardioDate); 
+
+            // Construir el payload con los campos de fecha y hora explícitos
+            const payload = { 
+                // Los dos campos de fecha y la hora (en el orden lógico de tu encabezado)
+                fechaCierreActual: fechaCierreActual,       
+                fechaCierreTardio: fechaCierreTardio,       
+                horaCierre: horaCierreActual,               
+                
+                // Responsable y Notas
+                usuario: responsable, 
+                notas: notas,
+
+                // Datos financieros (tomados de cierreData, explícitamente listados)
+                efectivoContado: cierreData.efectivoContado,
+                efectivoEsperado: cierreData.efectivoEsperado,
+                diferenciaEfectivo: cierreData.diferenciaEfectivo,
+
+                transferenciaContada: cierreData.transferenciaContada,
+                transferenciaEsperada: cierreData.transferenciaEsperada,
+                diferenciaTransferencia: cierreData.diferenciaTransferencia,
+                
+                // Nota: Incluyo Mixto (Efectivo/Transferencia) y Otros.
+                // Si su API/Google Sheet no tiene las columnas para Mixto, 
+                // deberá ajustar la Google Apps Script para omitir o fusionar estos campos.
+                mixtoContado: cierreData.mixtoContado,
+                mixtoEsperado: cierreData.mixtoEsperado,
+                diferenciaMixto: cierreData.diferenciaMixto,
+
+                otrosContados: cierreData.otrosContados,
+                otrosEsperados: cierreData.otrosEsperados,
+                diferenciaOtros: cierreData.diferenciaOtros,
+
+                diferenciaTotal: cierreData.diferenciaTotal,
+                totalSistema: cierreData.totalSistema,
+                totalContado: cierreData.totalContado
+            };
+            // ⭐ FIN CAMBIO
 
             const btn = document.getElementById('btnRegistrarCierre');
             const original = btn.textContent;
@@ -1215,22 +1316,61 @@ document.getElementById('mobile-menu-btn')?.addEventListener('click', (e) => {
         /* =================================
            EVENTOS INICIALES
            ================================= */
-        document.addEventListener('DOMContentLoaded', () => {
-            // set fecha en fechaConsulta
+document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const yyyy = today.getFullYear(), mm = String(today.getMonth() + 1).padStart(2, '0'), dd = String(today.getDate()).padStart(2, '0');
-            document.getElementById('fechaConsulta').value = `${yyyy}-${mm}-${dd}`;
+            const todayISO = `${yyyy}-${mm}-${dd}`;
+            
+            // Inicializar campo de fecha de cierre y consulta
+            const fechaConsultaEl = document.getElementById('fechaConsulta');
+            const fechaCierreEl = document.getElementById('fechaCierreReal');
 
-            // asignar listeners
+            if (fechaConsultaEl) fechaConsultaEl.value = todayISO;
+            if (fechaCierreEl) fechaCierreEl.value = todayISO;
+
+            // Asignar listeners
             document.getElementById('btnRegistrarCierre').addEventListener('click', registrarCierreAPI);
             document.getElementById('responsableCierre').addEventListener('input', checkResponsable);
+            fechaCierreEl?.addEventListener('change', cargarPedidos); // Nuevo listener para recargar al cambiar fecha
 
-            // cargar datos iniciales
-            cargarPedidos();
+            // ⭐ LÓGICA PRINCIPAL: CARGAR CONFIG.JSON
+            const estadoCargaCierre = document.getElementById('estadoCarga');
+            estadoCargaCierre.textContent = '⏳ Cargando configuración...';
 
-            // asegurar que cierre-section se muestre al inicio
-            const cierreLink = document.getElementById('link-cierre');
-            if (cierreLink) showSection(cierreLink);
+            fetch("../config.json")
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error(`Error HTTP: ${r.status}`);
+                    }
+                    return r.json();
+                })
+                .then(cfg => {
+                    // 1. Mapeo de URLs
+                    // Utilizamos reciboBaseDatos o envioBaseDatos para API_URL_PEDIDOS (son la misma URL en tu config)
+                    API_URL_PEDIDOS = cfg.apiUrls.reciboBaseDatos || cfg.apiUrls.envioBaseDatos; 
+                    API_URL_CIERRES = cfg.apiUrls.CajaDatos;
+                    
+                    if (!API_URL_PEDIDOS || !API_URL_CIERRES) {
+                         throw new Error("Una de las URLs de la API no está definida en config.json.");
+                    }
+
+                    console.log("✅ Configuración cargada. Iniciando carga de pedidos...");
+                    estadoCargaCierre.textContent = '⏳ Configuración cargada. Cargando datos de ventas...';
+                    
+                    // 2. Asegurar que cierre-section se muestre al inicio
+                    const cierreLink = document.getElementById('link-cierre');
+                    if (cierreLink) showSection(cierreLink); 
+
+                    // 3. Cargar datos iniciales DESPUÉS de cargar la configuración
+                    cargarPedidos(); 
+                })
+                .catch(err => {
+                    console.error("❌ Error cargando config.json:", err);
+                    estadoCargaCierre.textContent = '❌ Error fatal al cargar configuración. Revise ../config.json.';
+                    estadoCargaCierre.style.color = 'var(--danger)';
+                    alert("Error al cargar la configuración de la API. Revise la consola.");
+                });
+            // ⭐ FIN LÓGICA PRINCIPAL
         });
 
         // mejorar UX: cerrar sidebar al redimensionar a desktop

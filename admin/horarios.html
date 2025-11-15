@@ -1,581 +1,796 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🕒 Gestión de Horarios</title>
-  <link rel="icon" type="image/png" href="img/icono_tienda.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    /* =================================
-       VARIABLES / RESET (Estilo Unificado)
-       ================================ */
-    :root {
-      --primary: #5bc0de;
-      --accent: #46b8da;
-      --muted: #909ba7;
-      --success: #63d471;
-      --warning: #f8c050;
-      --danger: #ff6b6b;
-      --bg: #1e1e2d;
-      /* Fondo oscuro */
-      --card: #2b2b3f;
-      /* Color de tarjeta oscura */
-      --line: #4a4a68;
-      --text: #f1f1f1;
-      /* Texto claro */
-      --input: #3c3c50;
-      --shadow: rgba(0, 0, 0, 0.4);
-      --shadow-light: rgba(255, 255, 255, 0.05);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Horarios</title>
+    
+    <!-- Enlazar Google Fonts para 'Inter' -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================================
+        VARIABLES / RESET
+        ================================ */
+        :root {
+            --primary: #5bc0de; /* Azul brillante */
+            --accent: #46b8da;
+            --muted: #909ba7;
+            --success: #63d471;
+            --warning: #f8c050;
+            --danger: #ff6b6b;
+            --bg: #1e1e2d; /* Fondo oscuro */
+            --card: #2b2b3f; /* Color base de la tarjeta */
+            --line: #4a4a68; /* Líneas divisorias */
+            --text: #f1f1f1; /* Texto claro */
+            --input: #3c3c58; /* Fondo de inputs/tablas */
+            --radius: 12px;
+            --shadow-1: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      margin: 0;
-      padding: 1rem;
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
+        html,
+        body {
+            height: 100%;
+        }
 
-    /* =================================
-       CONTENEDOR PRINCIPAL
-       ================================ */
-    .container {
-      width: 100%;
-      max-width: 900px;
-      margin: 1rem 0;
-      padding: 24px;
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 10px 30px var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 18px;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--card), rgba(28, 28, 40, 0.9));
+            border-radius: var(--radius);
+            padding: 25px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-1);
+        }
+
+        /* Título Principal */
+        h1 {
+            margin: 0 0 20px 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+.admin-btn-top {
+    align-self: flex-start;     /* Lo envía a la izquierda */
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    background: linear-gradient(135deg, #3a3a4a, #2a2a3a);
+    color: var(--text);
+
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+
+    margin-bottom: 10px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    transition: all 0.2s ease-in-out;
+}
+
+.admin-btn-top:hover {
+    background: linear-gradient(135deg, #4b4b5e, #333346);
+    transform: translateY(-2px);
+}
+
+
+        /* Carga */
+        #loading {
+            padding: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        /* ================================
+        TABLA Y FORMULARIO
+        ================================ */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0; 
+            margin-top: 20px;
+            background: var(--input);
+            border-radius: var(--radius);
+            overflow: hidden; 
+        }
+
+        th, td {
+            padding: 14px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle; 
+        }
+
+        th {
+            background: var(--primary);
+            color: var(--input);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        
+        /* Redondeo de las esquinas del encabezado */
+        #horario-table thead tr:first-child th:first-child {
+            border-top-left-radius: var(--radius);
+        }
+        #horario-table thead tr:first-child th:last-child {
+            border-top-right-radius: var(--radius);
+        }
+
+        td {
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        
+        /* Resaltar fila al pasar el ratón */
+        #horario-table tbody tr:hover {
+            background-color: var(--card);
+        }
+        
+        /* Última fila sin borde inferior */
+        #horario-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Input de Hora */
+        input[type="time"] {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--card);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s, opacity 0.3s, background-color 0.3s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="time"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(91, 192, 222, 0.4); 
+            background-color: var(--card);
+        }
+        
+        /* Asegurar que el texto dentro del input[type="time"] sea visible en el fondo oscuro */
+        input[type="time"]::-webkit-datetime-edit {
+            color: var(--text);
+        }
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1); 
+            cursor: pointer;
+        }
+        
+        /* Estilo para ocultar el input de hora siguiente cuando no está activo */
+        .hora-siguiente-input.hidden {
+            opacity: 0.3;
+            pointer-events: none;
+            border-color: transparent;
+            background-color: var(--input);
+        }
+
+        /* Estilo: Input de Hora Fin cuando el Día Siguiente está activo */
+        .hora-fin-input.disabled-overlay {
+            background-color: var(--input); 
+            border-color: var(--line);
+            color: var(--muted);
+            opacity: 0.6;
+            cursor: not-allowed;
+            /* Estilo para el texto "Día Siguiente" */
+            font-weight: 600;
+            text-align: center;
+            /* Quitar el icono del reloj */
+            pointer-events: none; 
+        }
+
+        .hora-fin-input.disabled-overlay::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+
+
+        /* Primera columna (Día) - Centrado y negrita */
+        #horario-table tbody tr td:first-child {
+            font-weight: 700;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        /* ================================
+        ESTILOS DEL TOGGLE SWITCH
+        ================================ */
+        .switch-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 25px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--line); 
+            transition: .4s;
+            border-radius: 25px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 19px;
+            width: 19px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text); 
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success); 
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(25px);
+        }
+
+
+        /* Botón de Guardar */
+        #guardar-btn {
+            width: 100%;
+            padding: 14px 20px;
+            margin-top: 25px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            
+            /* Degradado y sombra del botón principal */
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--input);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+        #guardar-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #7bd9f0, #49c4dd);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        #guardar-btn:disabled { 
+            background: var(--line); 
+            color: var(--muted);
+            box-shadow: none;
+            cursor: not-allowed; 
+        }
+
+        /* Mensajes de Estado */
+        .mensaje { 
+            margin-top: 15px; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-weight: 600;
+            display: none;
+            border: 1px solid;
+            text-align: center;
+        }
+        
+        .exito { 
+            border-color: var(--success); 
+            color: var(--success); 
+            background-color: rgba(99, 212, 113, 0.1); 
+        }
+        
+        .error { 
+            border-color: var(--danger); 
+            color: var(--danger); 
+            background-color: rgba(255, 107, 107, 0.1); 
+        }
+
+@media (max-width: 768px) {
+    .card {
+        padding: 15px;
     }
 
     h1 {
-      text-align: center;
-      color: var(--primary);
-      margin-top: 0;
-      font-size: 2rem;
-      font-weight: 800;
+        font-size: 1.5rem;
     }
 
-    /* =================================
-       ESTADO Y CONTROLES
-       ================================ */
-    #estado {
-      padding: 10px;
-      border-radius: 8px;
-      background: var(--input);
-      color: var(--text);
-      text-align: center;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: inset 0 1px 3px var(--shadow);
+    /* Scroll horizontal solo en la tabla */
+    #horario-container {
+        overflow-x: auto;
+        position: relative; /* NECESARIO para sticky */
     }
 
-    .controles {
-      display: flex;
-      gap: 10px;
+    #horario-table {
+        min-width: 900px;
     }
 
-    .controles button {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 4px 10px var(--shadow);
+    th, td {
+        padding: 10px 8px;
+        font-size: 0.9rem;
     }
 
-    #guardarBtn {
-      background: var(--success);
-      color: var(--bg);
+    /* 🔥 BOTÓN FIJO EN SU LUGAR */
+    #guardar-btn {
+        position: sticky;
+        bottom: 0;          /* pegado abajo */
+        left: 0;
+        right: 0;
+
+        width: 100%;        /* ocupa todo el ancho */
+        margin-top: 18px;
+
+        z-index: 50;        /* por encima de la tabla */
+        display: block;
     }
+}
 
-    #guardarBtn:hover {
-      background: #50c85d;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(99, 212, 113, 0.4);
-    }
+/* Fila de día cerrado */
+.fila-cerrada {
+    background-color: rgba(255, 0, 0, 0.50) !important; /* Fondo rojo suave */
+}
 
-    #recargarBtn {
-      background: var(--primary);
-      color: var(--bg);
-    }
+/* Día en rojo cuando está cerrado */
+.fila-cerrada td:first-child {
+    color: var(--danger) !important;   /* Rojo */
+    font-weight: 900;
+}
 
-    #recargarBtn:hover {
-      background: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(91, 192, 222, 0.4);
-    }
 
-    /* =================================
-       TABLA DE HORARIOS
-       ================================ */
-    .horario-list {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .horario-row {
-      display: grid;
-      grid-template-columns: 1fr repeat(2, 0.8fr) 0.5fr;
-      align-items: center;
-      padding: 12px 15px;
-      background: var(--input);
-      border-radius: 8px;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 5px var(--shadow);
-    }
-
-    .horario-row:hover {
-      background: #4a4a68;
-    }
-
-    .horario-row.inactive {
-      opacity: 0.5;
-      background: #3c3c50;
-    }
-
-    .day-name {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--text);
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .input-group label {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .horario-input {
-      background: var(--card);
-      border: 1px solid var(--line);
-      padding: 8px;
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-
-    .horario-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(91, 192, 222, 0.3);
-    }
-
-    .status-toggle {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Interruptor tipo iOS */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 28px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--danger);
-      transition: .4s;
-      border-radius: 28px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 4px;
-      bottom: 4px;
-      background-color: var(--text);
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background-color: var(--success);
-    }
-
-    input:focus+.slider {
-      box-shadow: 0 0 1px var(--primary);
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(22px);
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 600px) {
-      .horario-row {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
-        gap: 8px;
-      }
-
-      .day-name {
-        grid-area: 1 / 1 / 2 / 2;
-        text-align: left;
-        padding-bottom: 5px;
-        border-bottom: 1px dashed var(--line);
-      }
-
-      .input-group:nth-of-type(1) {
-        grid-area: 2 / 1 / 3 / 2;
-      }
-
-      .input-group:nth-of-type(2) {
-        grid-area: 3 / 1 / 4 / 2;
-      }
-
-      .status-toggle {
-        grid-area: 4 / 1 / 5 / 2;
-        justify-content: flex-start;
-        padding-top: 10px;
-      }
-    }
-  </style>
+    </style>
 </head>
-
 <body>
 
-  <div class="container">
-    <h1>🕒 Configuración de Horarios</h1>
+  
 
-    <div id="estado">Cargando configuración...</div>
+<div class="main-container">
 
-    <div id="horario-form" class="horario-list">
-      <!-- Las filas de horario se insertarán aquí por JavaScript -->
-    </div>
+    <button class="admin-btn-top" onclick="window.location.href='admin.html'">
+        ⚙️ Ir al Panel Admin
+    </button>
 
-    <div class="controles">
-      <button id="guardarBtn" title="Guardar los cambios de horario en el servidor">Guardar Horario</button>
-      <button id="recargarBtn" title="Recargar el horario actual desde el servidor">Recargar</button>
-    </div>
-  </div>
-
-
-  <script>
-    /* =================================
-       CONFIGURACIÓN Y VARIABLES
-       ================================ */
-    // !! Reemplaza con la URL de tu Google Apps Script
-    const API_HORARIO_URL = 'https://script.google.com/macros/s/AKfycbxOCBCR_1CsQJz9YljFyiL3YxgnvlUy_eEQMSmmIf9jvsCt0a0aO0RjoUD0yfBbq1_liXXQ/exec';
-
-    const DAYS_OF_WEEK = [
-      'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
-    ];
-
-    const q = (selector) => document.querySelector(selector);
-    const qA = (selector) => document.querySelectorAll(selector);
-
-    /* =================================
-       UTILIDADES DE UI
-       ================================ */
-
-    /**
-     * Muestra un mensaje de estado con color.
-     * @param {string} message Mensaje a mostrar.
-     * @param {'info'|'success'|'danger'|'warning'} type Tipo de estado.
-     */
-    function showStatus(message, type = 'info') {
-      const estadoEl = q('#estado');
-      estadoEl.textContent = message;
-      estadoEl.style.color = 'var(--text)';
-      estadoEl.style.backgroundColor = 'var(--input)';
-
-      switch (type) {
-        case 'success':
-          estadoEl.style.backgroundColor = 'var(--success)';
-          estadoEl.style.color = 'var(--bg)';
-          break;
-        case 'danger':
-          estadoEl.style.backgroundColor = 'var(--danger)';
-          estadoEl.style.color = 'var(--text)';
-          break;
-        case 'warning':
-          estadoEl.style.backgroundColor = 'var(--warning)';
-          estadoEl.style.color = 'var(--bg)';
-          break;
-        case 'info':
-        default:
-          estadoEl.style.backgroundColor = 'var(--input)';
-          estadoEl.style.color = 'var(--text)';
-          break;
-      }
-    }
-
-
-    /* =================================
-       LÓGICA DEL FORMULARIO Y API
-       ================================ */
-
-    /**
-     * Genera la estructura HTML para una fila de horario.
-     * @param {string} day Nombre del día.
-     * @param {string} open Hora de apertura.
-     * @param {string} close Hora de cierre.
-     * @param {boolean} active Si está activo.
-     * @returns {string} HTML de la fila.
-     */
-    function createHorarioRow(day, open = '09:00', close = '18:00', active = true) {
-      const dayId = day.toLowerCase().replace(/[áéíóúüñ]/g, (match) => {
-        const accents = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ü': 'u', 'ñ': 'n' };
-        return accents[match] || match;
-      });
-
-      return `
-        <div class="horario-row ${active ? '' : 'inactive'}" data-day="${dayId}">
-          <div class="day-name">${day}</div>
-
-          <div class="input-group">
-            <label for="${dayId}-open">Apertura</label>
-            <input type="time" id="${dayId}-open" class="horario-input" value="${open}" ${active ? '' : 'disabled'}>
-          </div>
-
-          <div class="input-group">
-            <label for="${dayId}-close">Cierre</label>
-            <input type="time" id="${dayId}-close" class="horario-input" value="${close}" ${active ? '' : 'disabled'}>
-          </div>
-
-          <div class="status-toggle">
-            <label class="switch" title="Activar/Desactivar ${day}">
-              <input type="checkbox" id="${dayId}-active" data-day-toggle="${dayId}" ${active ? 'checked' : ''}>
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      `;
-    }
-
-    /**
-     * Inicializa la interfaz y genera las filas de horario.
-     * @param {Array<Object>} horarios Array de objetos de horario para inicializar.
-     */
-    function initializeUI(horarios = []) {
-      const formEl = q('#horario-form');
-      formEl.innerHTML = '';
-
-      const horarioMap = new Map(horarios.map(h => [h.day, h]));
-
-      DAYS_OF_WEEK.forEach(day => {
-        const data = horarioMap.get(day) || {
-          day: day,
-          open: (day === 'Sábado' || day === 'Domingo') ? '10:00' : '09:00',
-          close: (day === 'Sábado' || day === 'Domingo') ? '14:00' : '18:00',
-          active: (day !== 'Domingo')
-        };
-        formEl.insertAdjacentHTML('beforeend', createHorarioRow(data.day, data.open, data.close, data.active));
-      });
-
-      // Añadir listeners para los toggles de estado
-      qA('[data-day-toggle]').forEach(toggle => {
-        toggle.addEventListener('change', handleDayToggle);
-      });
-    }
-
-    /**
-     * Maneja el cambio en el toggle de estado de un día.
-     * @param {Event} e Evento de cambio.
-     */
-    function handleDayToggle(e) {
-      const dayId = e.target.dataset.dayToggle;
-      const row = q(`.horario-row[data-day="${dayId}"]`);
-      const inputs = qA(`.horario-row[data-day="${dayId}"] .horario-input`);
-
-      if (e.target.checked) {
-        row.classList.remove('inactive');
-        inputs.forEach(input => input.disabled = false);
-      } else {
-        row.classList.add('inactive');
-        inputs.forEach(input => input.disabled = true);
-      }
-    }
-
-
-    /**
-     * Carga el horario actual desde el Google Apps Script.
-     */
-    async function loadHorario() {
-      showStatus('⏳ Obteniendo horario actual...');
-      
-      const MAX_RETRIES = 3;
-      for (let i = 0; i < MAX_RETRIES; i++) {
-        try {
-            const url = `${API_HORARIO_URL}?action=getHorario`;
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-              throw new Error(`Error de red: ${response.statusText} (${response.status})`);
-            }
-
-            const result = await response.json();
+    <h1>Gestionar Horario</h1>
+        
+        <div id="loading" class="card">Cargando horario...</div>
+        
+        <div id="horario-container" class="card" style="display: none;">
             
-            if (result.status === 'success' && Array.isArray(result.data)) {
-              initializeUI(result.data);
-              showStatus('✅ Horario cargado correctamente.', 'success');
-              return; // Salir de la función si tiene éxito
-            } else if (result.status === 'no_data') {
-              showStatus('⚠️ No se encontró horario guardado. Usando valores predeterminados.', 'warning');
-              initializeUI(); // Inicializar con valores predeterminados
-              return;
-            } else {
-              throw new Error(`Error de API: ${result.message || 'Respuesta inesperada.'}`);
-            }
+            <div id="mensaje" class="mensaje"></div>
 
-        } catch (error) {
-            console.error('❌ Error al cargar el horario:', error);
-            if (i < MAX_RETRIES - 1) {
-              // Aplicar retroceso exponencial
-              const delay = Math.pow(2, i) * 1000;
-              console.log(`Reintentando en ${delay / 1000}s...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-            } else {
-              showStatus(`❌ ERROR al cargar: ${error.message}. Usando valores predeterminados.`, 'danger');
-              initializeUI(); // Inicializar con valores predeterminados si falla después de los reintentos
+            <table id="horario-table">
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Abierto / Cerrado</th> 
+                        <th>Cierra Día Siguiente</th> 
+                        <th>Hora Día Siguiente</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- El JS llenará esto -->
+                </tbody>
+            </table>
+            
+            <button id="guardar-btn">Guardar</button>
+        </div>
+    </div>
+
+    <script>
+        // *** TU URL DE APPS SCRIPT INSERTADA AQUÍ ***
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxW1cwQFbgWHXNZ84Qqu_-MMRxbbK1-UYjKS6CU_87lpb085YBJ-OyfzTrWzcdTSl-i/exec'; 
+
+        const tableBody = document.querySelector('#horario-table tbody');
+        const loadingDiv = document.querySelector('#loading');
+        const containerDiv = document.querySelector('#horario-container');
+        const guardarBtn = document.querySelector('#guardar-btn');
+        const mensajeDiv = document.querySelector('#mensaje');
+
+        // Constante para la hora de cierre forzada
+        const HORA_FIN_DIA_SIGUIENTE = '23:59';
+        const TEXTO_DIA_SIGUIENTE = 'Día Siguiente';
+
+
+        /**
+         * Muestra un mensaje de éxito o error.
+         */
+        function mostrarMensaje(text, tipo) {
+            mensajeDiv.textContent = text;
+            mensajeDiv.className = `mensaje ${tipo}`;
+            mensajeDiv.style.display = 'block';
+            setTimeout(() => {
+                mensajeDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        /**
+         * 1. Petición GET (Leer) para cargar los datos del horario desde Sheets.
+         */
+        async function cargarHorario() {
+            loadingDiv.style.display = 'block';
+            containerDiv.style.display = 'none';
+            tableBody.innerHTML = ''; 
+
+            try {
+                const response = await fetch(API_URL, { method: 'GET' });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    renderizarHorario(result.data);
+                    // LÍNEA ELIMINADA: mostrarMensaje(`Horario cargado con ${result.data.length} registros.`, 'exito');
+                } else {
+                    mostrarMensaje(`Error al cargar: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                mostrarMensaje(`Error de red o CORS: ${error.message}. Verifica el despliegue de tu API.`, 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+                containerDiv.style.display = 'block';
             }
         }
-      }
+
+        /**
+         * Convierte una cadena de texto (ej. 'TRUE', 'FALSE') a un estado booleano para el switch.
+         * @param {string} value - El valor leído de Google Sheets.
+         * @returns {boolean} True si el switch debe estar encendido (TRUE).
+         */
+        function parseSwitchState(value) {
+            if (typeof value === 'string') {
+                return value.trim().toUpperCase() === 'TRUE';
+            }
+            return false;
+        }
+
+        /**
+         * Maneja el cambio del switch "Cierra Día Siguiente".
+         * Se encarga de:
+         * 1. Mostrar/Ocultar el input de "Hora Día Siguiente".
+         * 2. Activar/Desactivar el input de "Hora Fin" y cambiar su apariencia/valor.
+         */
+        function handleDiaSiguienteChange(event) {
+            const checkbox = event.target;
+            const row = checkbox.closest('tr');
+            
+            // Elementos a controlar:
+            const horaFinInput = row.cells[2].querySelector('input[data-key="Hora_Fin"]');
+            const horaSiguienteInput = row.cells[5].querySelector('input[data-key="Hora_Dia_Siguiente"]');
+
+            if (checkbox.checked) {
+                // LÓGICA DE DÍA SIGUIENTE ACTIVA
+                
+                // 1. Mostrar input de Hora Día Siguiente
+                if (horaSiguienteInput) horaSiguienteInput.classList.remove('hidden');
+                
+                // 2. Desactivar y modificar input de Hora Fin
+                if (horaFinInput) {
+                    horaFinInput.disabled = true;
+                    horaFinInput.classList.add('disabled-overlay');
+                    // Mostrar el texto indicativo
+                    horaFinInput.value = TEXTO_DIA_SIGUIENTE; 
+                }
+            } else {
+                // LÓGICA DE DÍA SIGUIENTE INACTIVA
+                
+                // 1. Ocultar input de Hora Día Siguiente y limpiar su valor
+                if (horaSiguienteInput) {
+                    horaSiguienteInput.classList.add('hidden');
+                    horaSiguienteInput.value = ''; 
+                }
+                
+                // 2. Activar y restaurar input de Hora Fin
+                if (horaFinInput) {
+                    horaFinInput.disabled = false;
+                    horaFinInput.classList.remove('disabled-overlay');
+                    // Restaurar el valor inicial (si existe) o dejar vacío
+                    horaFinInput.value = horaFinInput.getAttribute('data-initial-value') || ''; 
+                }
+            }
+        }
+
+
+        /**
+         * Rellena la tabla con los datos obtenidos.
+         */
+function renderizarHorario(data) {
+    data.forEach(item => {
+        const row = tableBody.insertRow();
+
+        const day = item.Día;
+
+        // ============================
+        // NORMALIZAR TODAS LAS HORAS
+        // ============================
+        function normalizar(hora) {
+            if (!hora) return '';
+
+            let partes = hora.split(':');
+            let h = partes[0] || "00";
+            let m = partes[1] || "00";
+
+            h = h.padStart(2, "0");
+            m = m.padStart(2, "0");
+
+            return `${h}:${m}`;
+        }
+
+        const hora_inicio = normalizar(item.Hora_Inicio);
+        const hora_fin = normalizar(item.Hora_Fin);
+        const hora_dia_siguiente = normalizar(item.Hora_Dia_Siguiente);
+
+        const estado_checked = parseSwitchState(item.Estado);
+        if (!estado_checked) {
+    row.classList.add('fila-cerrada');
+}
+        const dia_siguiente_checked = parseSwitchState(item.Dia_Siguiente);
+
+        // ============================
+        // COLUMNA DÍA
+        // ============================
+        row.insertCell().textContent = day;
+
+        // ============================
+        // HORA INICIO
+        // ============================
+        row.insertCell().innerHTML = `
+            <input 
+                type="time" 
+                data-key="Hora_Inicio" 
+                value="${hora_inicio}">
+        `;
+
+        // ============================
+        // HORA FIN
+        // ============================
+        const horaFinCell = row.insertCell();
+        let horaFinDisplay = hora_fin;
+        let disabledFin = dia_siguiente_checked;
+        let classFin = disabledFin ? 'disabled-overlay' : '';
+
+        if (disabledFin) {
+            horaFinDisplay = TEXTO_DIA_SIGUIENTE;
+        }
+
+        horaFinCell.innerHTML = `
+            <input 
+                type="time"
+                data-key="Hora_Fin"
+                value="${horaFinDisplay}"
+                data-initial-value="${hora_fin === HORA_FIN_DIA_SIGUIENTE ? '' : hora_fin}"
+                class="hora-fin-input ${classFin}"
+                ${disabledFin ? "disabled" : ""}
+            >
+        `;
+
+        // ============================
+        // ESTADO (ABIERTO/CERRADO)
+        // ============================
+        row.insertCell().innerHTML = `
+            <div class="switch-container">
+                <label class="switch">
+                    <input type="checkbox" data-key="Estado" ${estado_checked ? "checked" : ""}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        `;
+        // Detectar cambios del switch de Estado
+const estadoToggle = row.cells[3].querySelector('input[data-key="Estado"]');
+
+estadoToggle.addEventListener('change', () => {
+    if (estadoToggle.checked) {
+        row.classList.remove('fila-cerrada');
+    } else {
+        row.classList.add('fila-cerrada');
+    }
+});
+
+
+        // ============================
+        // SWITCH DE DÍA SIGUIENTE
+        // ============================
+        const diaSiguienteCell = row.insertCell();
+        diaSiguienteCell.innerHTML = `
+            <div class="switch-container">
+                <label class="switch">
+                    <input type="checkbox" data-key="Dia_Siguiente" class="dia-siguiente-toggle" ${dia_siguiente_checked ? "checked" : ""}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        `;
+
+        const diaSiguienteToggle = diaSiguienteCell.querySelector('.dia-siguiente-toggle');
+        diaSiguienteToggle.addEventListener('change', handleDiaSiguienteChange);
+
+        // ============================
+        // HORA DEL DÍA SIGUIENTE
+        // ============================
+        const horaSiguienteCell = row.insertCell();
+        const isHidden = !dia_siguiente_checked ? "hidden" : "";
+
+        horaSiguienteCell.innerHTML = `
+            <input
+                type="time"
+                data-key="Hora_Dia_Siguiente"
+                value="${hora_dia_siguiente}"
+                class="hora-siguiente-input ${isHidden}"
+            >
+        `;
+    });
+}
+
+        /**
+         * 2. Petición POST (Guardar) para enviar los datos modificados a Sheets.
+         */
+async function guardarHorario() {
+    guardarBtn.disabled = true;
+    guardarBtn.textContent = 'Guardando... Por favor, espera.';
+
+    const rows = tableBody.querySelectorAll('tr');
+    const dataToSave = [];
+
+    for (let row of rows) {
+
+        const dayCell = row.cells[0];
+        const horaInicio = row.cells[1].querySelector('input[data-key="Hora_Inicio"]');
+        const horaFin = row.cells[2].querySelector('input[data-key="Hora_Fin"]');
+        const estadoInput = row.cells[3].querySelector('input[data-key="Estado"]');
+        const diaSiguienteInput = row.cells[4].querySelector('input[data-key="Dia_Siguiente"]');
+        const horaDiaSiguiente = row.cells[5].querySelector('input[data-key="Hora_Dia_Siguiente"]');
+
+        const abierto = estadoInput.checked;
+        const usaDiaSiguiente = diaSiguienteInput.checked;
+
+        // =============================
+        // VALIDACIONES DE CAMPOS
+        // =============================
+
+        // 1. HORA INICIO OBLIGATORIA
+        if (abierto && horaInicio.value.trim() === '') {
+            mostrarMensaje(`El día "${dayCell.textContent}" tiene HORA INICIO vacía.`, 'error');
+            guardarBtn.disabled = false;
+            guardarBtn.textContent = 'Guardar';
+            return;
+        }
+
+        // 2. HORA FIN OBLIGATORIA SOLO SI NO ES DÍA SIGUIENTE
+        if (abierto && !usaDiaSiguiente && horaFin.value.trim() === '') {
+            mostrarMensaje(`El día "${dayCell.textContent}" tiene HORA FIN vacía.`, 'error');
+            guardarBtn.disabled = false;
+            guardarBtn.textContent = 'Guardar';
+            return;
+        }
+
+        // 3. HORA DÍA SIGUIENTE OBLIGATORIA SI USA DÍA SIGUIENTE
+        if (abierto && usaDiaSiguiente && horaDiaSiguiente.value.trim() === '') {
+            mostrarMensaje(`El día "${dayCell.textContent}" usa Día Siguiente y requiere ingresar la hora del día siguiente.`, 'error');
+            guardarBtn.disabled = false;
+            guardarBtn.textContent = 'Guardar';
+            return;
+        }
+
+        // =============================
+        // CONSTRUCCIÓN DE DATOS
+        // =============================
+        const item = { 'Día': dayCell.textContent };
+
+        const inputs = row.querySelectorAll('input');
+
+        inputs.forEach(input => {
+            const key = input.getAttribute('data-key');
+
+            if (input.type === 'checkbox') {
+                item[key] = input.checked ? 'TRUE' : 'FALSE';
+
+            } else if (key === 'Hora_Fin') {
+                // SI USA DIA SIGUIENTE → ENVIAR 23:59
+                if (usaDiaSiguiente) {
+                    item[key] = HORA_FIN_DIA_SIGUIENTE;
+                } else {
+                    item[key] = input.value.trim();
+                }
+
+            } else if (key === 'Hora_Dia_Siguiente') {
+                // SI ESTÁ OCULTO → ENVIAR VACÍO
+                if (input.classList.contains('hidden')) {
+                    item[key] = '';
+                } else {
+                    item[key] = input.value.trim();
+                }
+
+            } else {
+                item[key] = input.value.trim();
+            }
+        });
+
+        dataToSave.push(item);
     }
 
-    /**
-     * Guarda el horario actual de la interfaz en el Google Apps Script.
-     */
-    async function saveHorario() {
-      showStatus('⏳ Guardando horario, por favor espera...');
-      q('#guardarBtn').disabled = true;
-
-      const horarioData = [];
-      qA('.horario-row').forEach(row => {
-        const dayId = row.dataset.day;
-        const dayName = row.querySelector('.day-name').textContent;
-        const openInput = row.querySelector(`#${dayId}-open`);
-        const closeInput = row.querySelector(`#${dayId}-close`);
-        const activeToggle = row.querySelector(`#${dayId}-active`);
-
-        const isActive = activeToggle.checked;
-        const openTime = isActive ? openInput.value : '';
-        const closeTime = isActive ? closeInput.value : '';
-
-        // Solo se guarda si hay valores o si está inactivo
-        if (isActive && (!openTime || !closeTime)) {
-          showStatus(`⚠️ Error: Debes ingresar hora de apertura y cierre para ${dayName}.`, 'warning');
-          q('#guardarBtn').disabled = false;
-          throw new Error('Faltan horas de apertura/cierre.');
-        }
-
-        horarioData.push({
-          day: dayName,
-          open: openTime,
-          close: closeTime,
-          active: isActive
-        });
-      });
-
-      const payload = {
-        action: 'saveHorario',
-        horario: horarioData
-      };
-
-      const MAX_RETRIES = 3;
-      for (let i = 0; i < MAX_RETRIES; i++) {
-        try {
-          const response = await fetch(API_HORARIO_URL, {
+    // =============================
+    // GUARDAR EN SHEETS
+    // =============================
+    try {
+        const response = await fetch(API_URL, {
             method: 'POST',
             mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-          });
+            body: JSON.stringify(dataToSave)
+        });
 
-          if (!response.ok) {
-            throw new Error(`Error de red: ${response.statusText} (${response.status})`);
-          }
+        const result = await response.json();
 
-          const result = await response.json();
-
-          if (result.status === 'success') {
-            showStatus('✅ Horario guardado con éxito.', 'success');
-            setTimeout(() => showStatus('Horario actualizado.'), 3000);
-            return;
-          } else {
-            throw new Error(`Error de API: ${result.message || 'Respuesta de API inesperada.'}`);
-          }
-
-        } catch (error) {
-          console.error('❌ Error al guardar el horario:', error);
-          if (i < MAX_RETRIES - 1) {
-              const delay = Math.pow(2, i) * 1000;
-              console.log(`Reintentando en ${delay / 1000}s...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-              showStatus(`❌ ERROR al guardar: ${error.message}.`, 'danger');
-          }
-        } finally {
-            q('#guardarBtn').disabled = false;
+        if (result.status === 'success') {
+            mostrarMensaje(`✅ ${result.message}`, 'exito');
+            setTimeout(cargarHorario, 1500);
+        } else {
+            mostrarMensaje(`❌ Error al guardar: ${result.message}`, 'error');
         }
-      }
+
+    } catch (error) {
+        mostrarMensaje(`Error de red al guardar: ${error.message}`, 'error');
+    } finally {
+        guardarBtn.disabled = false;
+        guardarBtn.textContent = 'Guardar';
     }
+}
 
+        // --- Event Listeners ---
+        guardarBtn.addEventListener('click', guardarHorario);
 
-    /* =================================
-       INICIALIZACIÓN
-       ================================ */
+        // --- Inicio de la aplicación ---
+        cargarHorario();
+    </script>
 
-    window.onload = () => {
-      if (!API_HORARIO_URL || API_HORARIO_URL.includes('AKfycbxOCBCR_1CsQJz9YljFyiL3YxgnvlUy_eEQMSmmIf9jvsCt0aO0RjoUD0yfBbq1_liXXQ/exec'.slice(0, 10))) {
-        showStatus('⚠️ ADVERTENCIA: La URL de la API es de ejemplo. Cámbiala para producción.', 'warning');
-      }
-
-      q('#guardarBtn').addEventListener('click', saveHorario);
-      q('#recargarBtn').addEventListener('click', loadHorario);
-
-      // Cargar el horario al iniciar la página
-      loadHorario();
-    };
-  </script>
 </body>
-
 </html>

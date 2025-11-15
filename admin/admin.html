@@ -121,35 +121,42 @@
 <body>
     <header>
         <h1>⚙️ Panel Administrativo</h1>
-        <p>Controla tu tienda desde un solo lugar</p>
+        <p>Controla tu todo desde un solo lugar</p>
     </header>
 
-    <section class="menu">
-        <div class="card" onclick="location.href='pedidos.html'">
-            <h2>📦 Pedidos</h2>
-            <p>Ver pedidos en tiempo real</p>
-        </div>
+<section class="menu">
 
-        <div class="card" onclick="location.href='estadisticas.html'">
-            <h2>📊 Estadísticas</h2>
-            <p>Resumen de ventas y desempeño</p>
-        </div>
+    <!-- 1 - Operación en vivo -->
+    <div class="card" onclick="location.href='pedidos.html'">
+        <h2>📦 Pedidos</h2>
+        <p>Ver pedidos en tiempo real</p>
+    </div>
 
-        <div class="card" onclick="location.href='cierre_caja.html'">
-            <h2>💰 Cierre de Caja</h2>
-            <p>Registra el efectivo y concilia el día</p>
-        </div>
-        
-        <div class="card" onclick="location.href='horarios.html'">
-            <h2>🕒 Horarios</h2>
-            <p>Configura apertura y cierre</p>
-        </div>
+    <!-- 2 - Dinero / cierre -->
+    <div class="card" onclick="location.href='cierre_caja.html'">
+        <h2>💰 Cierre de Caja</h2>
+        <p>Registra y concilia el día</p>
+    </div>
 
-        <div class="card" onclick="alert('🛒 Próximamente: gestión de productos')">
-            <h2>🛒 Productos</h2>
-            <p>Lista y control de artículos</p>
-        </div>
-    </section>
+    <!-- 3 - Gestión del negocio -->
+    <div class="card" onclick="alert('🛒 Próximamente: gestión de productos')">
+        <h2>🛒 Productos</h2>
+        <p>Lista y control de artículos</p>
+    </div>
+
+    <!-- 4 - Análisis -->
+    <div class="card" onclick="location.href='estadisticas.html'">
+        <h2>📊 Estadísticas</h2>
+        <p>Resumen de ventas y desempeño</p>
+    </div>
+
+    <!-- 5 - Configuración -->
+    <div class="card" onclick="location.href='horarios.html'">
+        <h2>🕒 Horarios</h2>
+        <p>Configura apertura y cierre</p>
+    </div>
+
+</section>
 
     <footer>Desarrollado con ❤️ para tu restaurante</footer>
 </body>

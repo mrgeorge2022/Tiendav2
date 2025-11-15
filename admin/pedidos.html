@@ -338,13 +338,13 @@
 </head>
 
 <body>
-  <h1>Panel de Pedidos</h1>
-
   <div class="volver-admin">
     <button onclick="window.location.href='admin.html'">
             ⚙️ Ir al Panel Admin
         </button>
   </div>
+  <h1>Panel de Pedidos</h1>
+
 
 
   <div class="filtros">
@@ -438,7 +438,7 @@
         headerMes.className = "mes-header";
         // Muestra el nombre del mes y el año (si está disponible y es distinto al actual)
         const anio = pedidosPorMes[mes][0].fecha.split("/")[2] || new Date().getFullYear();
-        headerMes.innerHTML = `📅 ${mesesNombres[Number(mes) - 1]} ${anio !== new Date().getFullYear().toString() ? anio : ''}`;
+        headerMes.innerHTML = `${mesesNombres[Number(mes) - 1]} ${anio !== new Date().getFullYear().toString() ? anio : ''}`;
         contenedor.appendChild(headerMes);
 
         const bloqueMes = document.createElement("div");

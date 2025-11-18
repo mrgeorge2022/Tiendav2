@@ -44,7 +44,7 @@
         body {
             margin: 0;
             font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: var(--bg);
+            background: #212133;
             color: var(--text);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -500,30 +500,47 @@
 }
 
 
-/* Clase para el input de fecha y botón de recarga */
+/*
+ * Versión 2.0 - Responsiva con Flexbox
+ * Comportamiento deseado:
+ * - Escritorio (> 768px): Layout horizontal (Label | Input | Botón)
+ * - Móvil (< 768px): Layout apilado (Label | Input | Botón)
+ */
 .fecha-cierre-container {
+    /* Por defecto, usamos flex para alinear horizontalmente y definir el espaciado */
     display: flex;
     gap: 10px;
-    align-items: center;
+    align-items: center; /* Centra verticalmente todos los elementos */
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px dashed var(--line);
+    
+    /* Nota: Usar display: flex; aquí asegura el layout de escritorio */
 }
+
+/* Ajustes para los elementos internos */
 .fecha-cierre-container label {
     font-weight: 700;
     white-space: nowrap;
+    /* En escritorio, el label toma solo el espacio que necesita */
 }
+
 .fecha-cierre-container input[type="date"] {
+    /* Permite que el input crezca para ocupar el espacio restante en escritorio */
+    flex-grow: 1; 
+    
     padding: 8px 12px;
-    width: 100%;
-    max-width: 200px; /* Limitar el ancho */
     border-radius: 8px;
     border: 1px solid var(--line);
     background: var(--input);
     color: var(--text);
 }
+
 .fecha-cierre-container .btn-reload {
-    background: var(--success); /* Usamos el color de éxito para el botón de recarga */
+    /* El botón no crece, solo toma el espacio de su contenido */
+    flex-shrink: 0;
+    
+    background: var(--success);
     color: var(--input);
     padding: 8px 12px;
     font-weight: 700;
@@ -531,6 +548,24 @@
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
+}
+
+/*
+ * MEDIA QUERY PARA MÓVILES
+ * Apila los elementos en pantallas pequeñas (ej: 768px o menos)
+ */
+@media (max-width: 768px) {
+    .fecha-cierre-container {
+        /* Fuerza a que los elementos se apilen verticalmente */
+        flex-direction: column;
+        align-items: stretch; /* Estira los elementos para que ocupen todo el ancho */
+        gap: 8px; /* Reduce un poco el espacio vertical entre elementos */
+    }
+    
+    /* Asegura que el botón ocupe todo el ancho en móvil */
+    .fecha-cierre-container .btn-reload {
+        width: 100%;
+    }
 }
 
 
